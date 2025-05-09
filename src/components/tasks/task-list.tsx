@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import {
   Pencil,
@@ -80,28 +80,31 @@ export function TaskList({
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Create a new URLSearchParams instance for building query params
-  const buildQueryParams = (overrides: Record<string, string> = {}) => {
-    const params = new URLSearchParams(searchParams.toString());
+  // Build query parameters for API requests
+  const buildQueryParams = useCallback(
+    (overrides: Record<string, string> = {}) => {
+      const params = new URLSearchParams(searchParams.toString());
 
-    // Set default filters
-    if (status) params.set("status", status);
-    if (category) params.set("categoryId", category);
+      // Set default filters
+      if (status) params.set("status", status);
+      if (category) params.set("categoryId", category);
 
-    // Apply overrides
-    Object.entries(overrides).forEach(([key, value]) => {
-      if (value) {
-        params.set(key, value);
-      } else {
-        params.delete(key);
-      }
-    });
+      // Apply overrides
+      Object.entries(overrides).forEach(([key, value]) => {
+        if (value) {
+          params.set(key, value);
+        } else {
+          params.delete(key);
+        }
+      });
 
-    return params;
-  };
+      return params;
+    },
+    [searchParams, status, category]
+  );
 
   // Fetch tasks based on filters
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -113,7 +116,7 @@ export function TaskList({
 
       const response = await apiClient.getTasks(params);
 
-      setTasks(response.tasks);
+      setTasks(response.tasks as unknown as Task[]);
       setPagination(
         response.pagination || {
           total: response.tasks.length,
@@ -128,14 +131,12 @@ export function TaskList({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [buildQueryParams]);
 
   // Watch for search param changes and re-fetch tasks
   useEffect(() => {
-    if (searchParams) {
-      fetchTasks();
-    }
-  }, [searchParams]);
+    fetchTasks();
+  }, [fetchTasks]);
 
   // Delete task handler
   const deleteTask = async () => {
@@ -160,7 +161,13 @@ export function TaskList({
   // Update task status
   const updateTaskStatus = async (taskId: string, newStatus: TaskStatus) => {
     try {
-      await apiClient.updateTask(taskId, { status: newStatus });
+      const currentTask = tasks.find((task) => task.id === taskId);
+      if (!currentTask) return;
+
+      await apiClient.updateTask(taskId, {
+        title: currentTask.title,
+        status: newStatus,
+      });
 
       // Update local state
       setTasks((prevTasks) =>
@@ -206,7 +213,7 @@ export function TaskList({
 
   const bulkDeleteTasks = async () => {
     const tasksToDelete = Object.entries(selectedTasks)
-      .filter(([_, isSelected]) => isSelected)
+      .filter(([, isSelected]) => isSelected)
       .map(([id]) => id);
 
     if (tasksToDelete.length === 0) return;

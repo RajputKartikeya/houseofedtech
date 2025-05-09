@@ -112,10 +112,12 @@ export default function CategoriesPage() {
       setIsDialogOpen(false);
       setCategoryToEdit(null);
       fetchCategories();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Category save error:", error);
 
-      if (error.status === 409) {
+      const err = error as { status?: number; data?: { message?: string } };
+
+      if (err.status === 409) {
         toast.error("A category with this name already exists");
       } else {
         toast.error(
@@ -137,11 +139,13 @@ export default function CategoriesPage() {
       toast.success("Category deleted successfully");
       fetchCategories();
       setCategoryToDelete(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting category:", error);
 
-      if (error.status === 400 && error.data?.message) {
-        setDeleteError(error.data.message);
+      const err = error as { status?: number; data?: { message?: string } };
+
+      if (err.status === 400 && err.data?.message) {
+        setDeleteError(err.data.message);
       } else {
         toast.error("Failed to delete category");
         setCategoryToDelete(null);

@@ -2,16 +2,18 @@
  * A utility for making API requests with proper error handling
  */
 
-type FetchOptions = RequestInit & {
-  body?: any;
+import { TaskPriority, TaskStatus } from "@/types";
+
+type FetchOptions = Omit<RequestInit, "body"> & {
+  body?: unknown;
   headers?: Record<string, string>;
 };
 
 export class ApiError extends Error {
   status: number;
-  data?: any;
+  data?: Record<string, unknown>;
 
-  constructor(status: number, message: string, data?: any) {
+  constructor(status: number, message: string, data?: Record<string, unknown>) {
     super(message);
     this.status = status;
     this.data = data;
@@ -22,7 +24,7 @@ export class ApiError extends Error {
 /**
  * Make an API request with proper error handling
  */
-export async function fetchApi<T = any>(
+export async function fetchApi<T = unknown>(
   url: string,
   options: FetchOptions = {}
 ): Promise<T> {
@@ -45,7 +47,7 @@ export async function fetchApi<T = any>(
   };
 
   // Add body if provided
-  if (body) {
+  if (body !== undefined) {
     fetchOptions.body = JSON.stringify(body);
   }
 
@@ -73,67 +75,125 @@ export async function fetchApi<T = any>(
   return data as T;
 }
 
+interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueDate?: string | Date;
+  category?: { id: string; name: string };
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface TasksResponse {
+  tasks: Task[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+interface Category {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface TaskCreateData {
+  title: string;
+  description?: string;
+  status?: TaskStatus;
+  priority?: TaskPriority;
+  dueDate?: Date | null;
+  categoryId?: string | null;
+}
+
+interface CategoryData {
+  name: string;
+}
+
+interface UserRegisterData {
+  name: string;
+  email: string;
+  password: string;
+}
+
 /**
  * API client methods
  */
 export const apiClient = {
   // Tasks
-  async getTasks(params?: URLSearchParams): Promise<any> {
+  async getTasks(params?: URLSearchParams): Promise<TasksResponse> {
     const url = params ? `/api/tasks?${params.toString()}` : "/api/tasks";
     return fetchApi(url);
   },
 
-  async getTask(id: string): Promise<any> {
+  async getTask(id: string): Promise<Task> {
     return fetchApi(`/api/tasks/${id}`);
   },
 
-  async createTask(data: any): Promise<any> {
+  async createTask(
+    data: TaskCreateData
+  ): Promise<{ message: string; task: Task }> {
     return fetchApi("/api/tasks", {
       method: "POST",
       body: data,
     });
   },
 
-  async updateTask(id: string, data: any): Promise<any> {
+  async updateTask(
+    id: string,
+    data: TaskCreateData
+  ): Promise<{ message: string; task: Task }> {
     return fetchApi(`/api/tasks/${id}`, {
       method: "PATCH",
       body: data,
     });
   },
 
-  async deleteTask(id: string): Promise<any> {
+  async deleteTask(id: string): Promise<{ message: string }> {
     return fetchApi(`/api/tasks/${id}`, {
       method: "DELETE",
     });
   },
 
   // Categories
-  async getCategories(): Promise<any> {
+  async getCategories(): Promise<Category[]> {
     return fetchApi("/api/categories");
   },
 
-  async createCategory(data: any): Promise<any> {
+  async createCategory(
+    data: CategoryData
+  ): Promise<{ message: string; category: Category }> {
     return fetchApi("/api/categories", {
       method: "POST",
       body: data,
     });
   },
 
-  async updateCategory(id: string, data: any): Promise<any> {
+  async updateCategory(
+    id: string,
+    data: CategoryData
+  ): Promise<{ message: string; category: Category }> {
     return fetchApi(`/api/categories/${id}`, {
       method: "PATCH",
       body: data,
     });
   },
 
-  async deleteCategory(id: string): Promise<any> {
+  async deleteCategory(id: string): Promise<{ message: string }> {
     return fetchApi(`/api/categories/${id}`, {
       method: "DELETE",
     });
   },
 
   // User registration
-  async register(data: any): Promise<any> {
+  async register(data: UserRegisterData): Promise<{ message: string }> {
     return fetchApi("/api/register", {
       method: "POST",
       body: data,

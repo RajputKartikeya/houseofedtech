@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build query filters
-    const queryFilter: any = { userId: session.user.id };
+    const queryFilter: Record<string, unknown> = { userId: session.user.id };
 
     if (status) {
       queryFilter.status = status;

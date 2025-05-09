@@ -64,7 +64,14 @@ export function TaskForm({
   onSuccess,
   onCancel,
 }: TaskFormProps) {
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<
+    Array<{
+      id: string;
+      name: string;
+      createdAt: string;
+      updatedAt: string;
+    }>
+  >([]);
   const isEditMode = !!taskId;
 
   // Form validation

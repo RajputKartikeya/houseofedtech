@@ -78,12 +78,14 @@ export default function RegisterPage() {
 
       toast.success("Registration successful! Please login.");
       router.push("/login");
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       console.error("Registration error:", error);
 
-      if (error.status === 409) {
+      const err = error as { status?: number; data?: { details?: string } };
+
+      if (err.status === 409) {
         setRegisterError("This email is already registered");
-      } else if (error.data?.details) {
+      } else if (err.data?.details) {
         setRegisterError("Please check your input and try again");
       } else {
         setRegisterError("Registration failed. Please try again later.");

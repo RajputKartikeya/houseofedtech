@@ -4,6 +4,7 @@ import {
   FieldValues,
   useForm,
   DefaultValues,
+  SubmitErrorHandler,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ZodSchema } from "zod";
@@ -20,7 +21,7 @@ interface UseFormValidationReturn<T extends FieldValues> {
   setIsSubmitting: (value: boolean) => void;
   handleSubmit: (
     onValid: (data: T) => Promise<void> | void,
-    onInvalid?: (errors: any) => void
+    onInvalid?: SubmitErrorHandler<T>
   ) => (e?: React.BaseSyntheticEvent) => Promise<void>;
 }
 
@@ -39,7 +40,7 @@ export function useFormValidation<T extends FieldValues>({
 
   const handleSubmit = (
     onValid: (data: T) => Promise<void> | void,
-    onInvalid?: (errors: any) => void
+    onInvalid?: SubmitErrorHandler<T>
   ) => {
     return form.handleSubmit(async (data: T) => {
       try {

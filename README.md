@@ -4,22 +4,67 @@ A full-stack task management application built with Next.js 14, TypeScript, Mong
 
 ## Features
 
-- **User Authentication**: Secure sign-up, login, and user management using NextAuth.js
-- **Task Management**: Create, edit, and delete tasks with various properties
-- **Categories**: Organize tasks with custom categories
-- **Filtering & Sorting**: Filter tasks by status, priority, and search terms
-- **Task Status Tracking**: Track tasks through different states (To Do, In Progress, Completed)
-- **Responsive Design**: Mobile-friendly UI built with Tailwind CSS and shadcn/ui
-- **User Profiles**: Update profile information and preferences
+- **User Authentication**
+
+  - Secure sign-up and login using NextAuth.js
+  - Protected routes with middleware
+  - JWT-based session management
+  - User profile management
+
+- **Task Management**
+
+  - Create, edit, and delete tasks
+  - Set task priorities (Low, Medium, High)
+  - Track task status (To Do, In Progress, Completed)
+  - Add due dates and descriptions
+  - Assign tasks to categories
+
+- **Category Management**
+
+  - Create and manage custom categories
+  - Organize tasks by category
+  - Edit and delete categories
+
+- **Advanced Filtering & Search**
+
+  - Filter tasks by status and priority
+  - Search tasks by title or description
+  - URL-based filter state management
+  - Responsive filter UI
+
+- **Modern UI/UX**
+  - Clean and intuitive interface
+  - Responsive design for all devices
+  - Loading states and animations
+  - Toast notifications for feedback
+  - Form validation with Zod
+  - Accessible components with shadcn/ui
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS, shadcn/ui
-- **Backend**: Next.js API routes, MongoDB with Mongoose
-- **Authentication**: NextAuth.js with JWT
-- **Form Validation**: React Hook Form with Zod
-- **State Management**: React Hooks
-- **Styling**: Tailwind CSS with a component-first approach
+- **Frontend**
+
+  - Next.js 14 (App Router)
+  - React 18
+  - TypeScript
+  - Tailwind CSS
+  - shadcn/ui components
+  - React Hook Form
+  - Zod validation
+  - Sonner toast notifications
+
+- **Backend**
+
+  - Next.js API routes
+  - MongoDB with Mongoose
+  - NextAuth.js for authentication
+  - JWT for session management
+
+- **Development Tools**
+  - ESLint for code linting
+  - Prettier for code formatting
+  - TypeScript for type safety
+  - Git for version control
 
 ## Getting Started
 
@@ -43,7 +88,7 @@ A full-stack task management application built with Next.js 14, TypeScript, Mong
    npm install
    ```
 
-3. Create a `.env.local` file in the root directory with the following:
+3. Create a `.env.local` file in the root directory:
 
    ```
    # MongoDB Connection String
@@ -66,46 +111,71 @@ A full-stack task management application built with Next.js 14, TypeScript, Mong
 
 ```
 src/
-├── app/                  # Next.js App Router
-│   ├── (auth)/           # Authentication pages (login, register)
-│   ├── (dashboard)/      # Dashboard and protected pages
-│   ├── api/              # API routes
-│   ├── globals.css       # Global styles
-│   └── layout.tsx        # Root layout
-├── components/           # React components
+├── app/                    # Next.js App Router
+│   ├── (auth)/            # Authentication pages
+│   │   ├── login/         # Login page and form
+│   │   └── register/      # Registration page
+│   ├── (dashboard)/       # Protected dashboard pages
+│   │   ├── dashboard/     # Main dashboard
+│   │   ├── tasks/         # Task management
+│   │   ├── categories/    # Category management
+│   │   └── profile/       # User profile
+│   ├── api/               # API routes
+│   │   ├── auth/          # Authentication endpoints
+│   │   ├── tasks/         # Task endpoints
+│   │   └── categories/    # Category endpoints
+│   └── layout.tsx         # Root layout
+├── components/            # React components
 │   ├── auth/             # Authentication components
 │   ├── dashboard/        # Dashboard components
 │   ├── tasks/            # Task-related components
 │   └── ui/               # UI components (shadcn/ui)
 ├── hooks/                # Custom React hooks
 ├── lib/                  # Utility library code
-│   └── db/               # Database utilities
-├── middleware.ts         # Next.js middleware for auth protection
-├── models/               # Mongoose models
-├── types/                # TypeScript types
-└── utils/                # Helper utilities
+│   └── db/              # Database utilities
+├── middleware.ts         # Next.js middleware for auth
+├── models/              # Mongoose models
+├── types/               # TypeScript types
+└── utils/               # Helper utilities
 ```
 
 ## API Routes
 
-- **Authentication**
+### Authentication
 
-  - POST `/api/auth/[...nextauth]` - Authentication endpoints
-  - POST `/api/register` - User registration
+- `POST /api/auth/[...nextauth]` - NextAuth.js authentication endpoints
+- `POST /api/register` - User registration endpoint
 
-- **Tasks**
+### Tasks
 
-  - GET `/api/tasks` - List all tasks (with filtering)
-  - POST `/api/tasks` - Create a new task
-  - GET `/api/tasks/:id` - Get a specific task
-  - PATCH `/api/tasks/:id` - Update a task
-  - DELETE `/api/tasks/:id` - Delete a task
+- `GET /api/tasks` - List tasks with filtering
+- `POST /api/tasks` - Create a new task
+- `GET /api/tasks/:id` - Get a specific task
+- `PATCH /api/tasks/:id` - Update a task
+- `DELETE /api/tasks/:id` - Delete a task
 
-- **Categories**
-  - GET `/api/categories` - List all categories
-  - POST `/api/categories` - Create a new category
-  - PATCH `/api/categories/:id` - Update a category
-  - DELETE `/api/categories/:id` - Delete a category
+### Categories
+
+- `GET /api/categories` - List all categories
+- `POST /api/categories` - Create a new category
+- `PATCH /api/categories/:id` - Update a category
+- `DELETE /api/categories/:id` - Delete a category
+
+## Development
+
+### Code Style
+
+- Follow the TypeScript and ESLint configurations
+- Use Prettier for consistent formatting
+- Write meaningful commit messages
+
+### Best Practices
+
+- Use TypeScript for type safety
+- Implement proper error handling
+- Add loading states for better UX
+- Follow React best practices
+- Write clean and maintainable code
 
 ## Deployment
 
@@ -115,6 +185,14 @@ This application is configured for deployment on Vercel:
 2. Connect your repository to Vercel
 3. Configure the environment variables in the Vercel dashboard
 4. Deploy!
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
@@ -127,3 +205,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [shadcn/ui](https://ui.shadcn.com/)
 - [MongoDB](https://www.mongodb.com/)
 - [NextAuth.js](https://next-auth.js.org/)
+- [React Hook Form](https://react-hook-form.com/)
+- [Zod](https://zod.dev/)

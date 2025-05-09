@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import {
-  PieChart,
   CheckCircle2,
   Clock,
   AlertTriangle,
@@ -12,13 +11,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiClient } from "@/utils/api-client";
 import { TaskStatus } from "@/types";
 
@@ -54,20 +47,20 @@ export default function DashboardPage() {
         // Calculate stats
         const tasks = response.tasks || [];
         const completedTasks = tasks.filter(
-          (task: any) => task.status === TaskStatus.COMPLETED
+          (task) => task.status === TaskStatus.COMPLETED
         ).length;
         const inProgressTasks = tasks.filter(
-          (task: any) => task.status === TaskStatus.IN_PROGRESS
+          (task) => task.status === TaskStatus.IN_PROGRESS
         ).length;
         const pendingTasks = tasks.filter(
-          (task: any) => task.status === TaskStatus.TODO
+          (task) => task.status === TaskStatus.TODO
         ).length;
 
         // Calculate overdue and due soon tasks
         const now = new Date();
 
         // Tasks that are overdue (due date is in the past and not completed)
-        const overdueTasksCount = tasks.filter((task: any) => {
+        const overdueTasksCount = tasks.filter((task) => {
           if (!task.dueDate || task.status === TaskStatus.COMPLETED)
             return false;
           const dueDate = new Date(task.dueDate);
@@ -78,7 +71,7 @@ export default function DashboardPage() {
         const threeDaysFromNow = new Date();
         threeDaysFromNow.setDate(now.getDate() + 3);
 
-        const dueSoonTasksCount = tasks.filter((task: any) => {
+        const dueSoonTasksCount = tasks.filter((task) => {
           if (!task.dueDate || task.status === TaskStatus.COMPLETED)
             return false;
           const dueDate = new Date(task.dueDate);
@@ -174,7 +167,8 @@ export default function DashboardPage() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <p className="mt-2 text-lg text-gray-600">
-          Welcome back, {session?.user?.name}. Here's an overview of your tasks.
+          Welcome back, {session?.user?.name}. Here&apos;s an overview of your
+          tasks.
         </p>
       </div>
 
