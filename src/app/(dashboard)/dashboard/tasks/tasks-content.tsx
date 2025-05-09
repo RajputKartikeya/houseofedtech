@@ -34,6 +34,7 @@ import { TaskPriority, TaskStatus } from "@/types";
 export default function TasksContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const [isCreateDialogOpen, setCreateDialogOpen] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<{
@@ -107,6 +108,7 @@ export default function TasksContent() {
   const handleTaskFormSuccess = () => {
     setCreateDialogOpen(false);
     setTaskToEdit(null);
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   const handleCloseTaskForm = () => {
@@ -201,7 +203,11 @@ export default function TasksContent() {
       </Card>
 
       {/* Task list */}
-      <TaskList onEditTask={handleEditTask} onTasksUpdated={() => {}} />
+      <TaskList
+        onEditTask={handleEditTask}
+        onTasksUpdated={() => setRefreshTrigger((prev) => prev + 1)}
+        refetchTrigger={refreshTrigger}
+      />
 
       {/* Create task dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setCreateDialogOpen}>

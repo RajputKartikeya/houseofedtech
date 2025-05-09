@@ -56,6 +56,7 @@ interface TaskListProps {
   category?: string;
   onEditTask?: (task: Task) => void;
   onTasksUpdated?: () => void;
+  refetchTrigger?: number;
 }
 
 export function TaskList({
@@ -63,6 +64,7 @@ export function TaskList({
   category,
   onEditTask,
   onTasksUpdated,
+  refetchTrigger = 0,
 }: TaskListProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -136,7 +138,7 @@ export function TaskList({
   // Watch for search param changes and re-fetch tasks
   useEffect(() => {
     fetchTasks();
-  }, [fetchTasks]);
+  }, [fetchTasks, refetchTrigger]);
 
   // Delete task handler
   const deleteTask = async () => {
