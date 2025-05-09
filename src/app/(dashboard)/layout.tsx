@@ -13,6 +13,8 @@ import {
   User,
   ChevronDown,
   Inbox,
+  ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -26,11 +28,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { Footer } from "@/components/ui/footer";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { data: session } = useSession();
   const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const getInitials = (name?: string) => {
     if (!name) return "U";
@@ -42,6 +46,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       .substring(0, 2);
   };
 
+  const getFirstName = (name?: string) => {
+    if (!name) return "";
+    return name.split(" ")[0];
+  };
+
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "All Tasks", href: "/dashboard/tasks", icon: Inbox },
@@ -49,6 +58,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   ];
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/login" });
@@ -56,33 +66,47 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex h-screen bg-background">
-      {/* Mobile sidebar */}
+      {/* Mobile sidebar overlay */}
       <div
         className={`fixed inset-0 z-40 bg-black/60 transition-opacity lg:hidden ${
-          sidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"
+          mobileMenuOpen ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
-        onClick={toggleSidebar}
+        onClick={toggleMobileMenu}
       />
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-card shadow-lg transition-transform lg:relative lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-background shadow-lg transition-all duration-300 lg:relative ${
+          sidebarOpen ? "w-64" : "w-20"
+        } ${
+          mobileMenuOpen
+            ? "translate-x-0"
+            : "-translate-x-full lg:translate-x-0"
         }`}
       >
-        <div className="flex h-16 items-center justify-between px-4">
-          <Link href="/dashboard" className="flex items-center">
-            <span className="text-xl font-bold text-primary">TaskManager</span>
-          </Link>
+        <div className="flex h-16 items-center justify-between bg-card px-4">
+          {sidebarOpen && (
+            <Link href="/dashboard" className="flex items-center">
+              <span className="text-xl font-bold text-primary">
+                TaskManager
+              </span>
+            </Link>
+          )}
           <button
-            className="rounded-md p-2 text-muted-foreground hover:bg-accent lg:hidden"
+            className={`rounded-md p-2 text-muted-foreground hover:bg-accent ${
+              sidebarOpen ? "ml-auto" : "mx-auto"
+            }`}
             onClick={toggleSidebar}
           >
-            <X size={20} />
+            {sidebarOpen ? (
+              <ChevronLeft size={20} />
+            ) : (
+              <ChevronRight size={20} />
+            )}
           </button>
         </div>
 
-        <nav className="mt-5 px-2">
+        <nav className="mt-5 flex-1 overflow-y-auto px-2">
           <div className="space-y-1">
             {navigation.map((item) => {
               const isActive =
@@ -97,33 +121,38 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                       : "text-muted-foreground hover:bg-accent"
                   }`}
                 >
-                  <item.icon className="mr-3 h-5 w-5" />
-                  {item.name}
+                  <item.icon
+                    className={`h-5 w-5 ${sidebarOpen ? "mr-3" : "mx-auto"}`}
+                  />
+                  {sidebarOpen && item.name}
                 </Link>
               );
             })}
           </div>
         </nav>
-      </aside>
 
-      {/* Main content */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Header */}
-        <header className="flex h-16 items-center justify-between border-b bg-card px-4 sm:px-6 relative z-10">
-          <button
-            className="rounded-md p-2 text-muted-foreground hover:bg-accent lg:hidden"
-            onClick={toggleSidebar}
+        {/* Bottom sidebar section with theme toggle and profile - now borderless */}
+        <div className="p-4">
+          <div
+            className={`flex ${
+              sidebarOpen
+                ? "flex-row items-center justify-between"
+                : "flex-col items-center space-y-4"
+            }`}
           >
-            <Menu size={20} />
-          </button>
-
-          <div className="flex items-center gap-4 ml-auto">
-            <ThemeToggle />
+            <ThemeToggle minimal={!sidebarOpen} />
 
             {/* User dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  className={`flex ${
+                    sidebarOpen
+                      ? "w-auto items-center gap-2"
+                      : "h-9 w-9 rounded-full p-0"
+                  }`}
+                >
                   <Avatar className="h-8 w-8">
                     <AvatarImage
                       src={session?.user?.image || ""}
@@ -133,19 +162,23 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                       {getInitials(session?.user?.name)}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="hidden md:inline-block">
-                    {session?.user?.name}
-                  </span>
-                  <ChevronDown size={16} />
+                  {sidebarOpen && (
+                    <>
+                      <span className="max-w-[80px] truncate text-sm">
+                        {getFirstName(session?.user?.name)}
+                      </span>
+                      <ChevronDown size={16} />
+                    </>
+                  )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuLabel>{session?.user?.name}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link
                     href="/dashboard/profile"
-                    className="flex items-center cursor-pointer"
+                    className="flex cursor-pointer items-center"
                   >
                     <User className="mr-2 h-4 w-4" />
                     Profile
@@ -161,10 +194,31 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        </header>
+        </div>
+      </aside>
 
-        {/* Main content container */}
-        <main className="flex-1 overflow-auto p-4 sm:p-6">{children}</main>
+      {/* Main content */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Mobile menu toggle */}
+        <div className="flex h-16 items-center border-b bg-card px-4 lg:hidden">
+          <button
+            className="rounded-md p-2 text-muted-foreground hover:bg-accent"
+            onClick={toggleMobileMenu}
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+          <span className="ml-4 text-xl font-bold text-primary">
+            TaskManager
+          </span>
+        </div>
+
+        {/* Main content container with flex structure to push footer to bottom */}
+        <div className="flex flex-col flex-1 overflow-auto">
+          <main className="flex-1 p-4 sm:p-6">{children}</main>
+          <div className="mt-auto">
+            <Footer />
+          </div>
+        </div>
       </div>
     </div>
   );
