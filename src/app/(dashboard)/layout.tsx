@@ -8,7 +8,6 @@ import {
   Menu,
   X,
   LayoutDashboard,
-  CheckSquare,
   Tag,
   LogOut,
   User,
@@ -26,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { data: session } = useSession();
@@ -45,7 +45,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "All Tasks", href: "/dashboard/tasks", icon: Inbox },
-    { name: "My Tasks", href: "/dashboard/my-tasks", icon: CheckSquare },
     { name: "Categories", href: "/dashboard/categories", icon: Tag },
   ];
 
@@ -56,10 +55,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-background">
       {/* Mobile sidebar */}
       <div
-        className={`fixed inset-0 z-40 bg-black bg-opacity-60 transition-opacity lg:hidden ${
+        className={`fixed inset-0 z-40 bg-black/60 transition-opacity lg:hidden ${
           sidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
         onClick={toggleSidebar}
@@ -67,16 +66,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-lg transition-transform lg:relative lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-card shadow-lg transition-transform lg:relative lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-16 items-center justify-between border-b px-4">
+        <div className="flex h-16 items-center justify-between px-4">
           <Link href="/dashboard" className="flex items-center">
             <span className="text-xl font-bold text-primary">TaskManager</span>
           </Link>
           <button
-            className="rounded-md p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
+            className="rounded-md p-2 text-muted-foreground hover:bg-accent lg:hidden"
             onClick={toggleSidebar}
           >
             <X size={20} />
@@ -95,7 +94,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                   className={`flex items-center rounded-md px-4 py-2 text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-primary/10 text-primary"
-                      : "text-gray-600 hover:bg-gray-100"
+                      : "text-muted-foreground hover:bg-accent"
                   }`}
                 >
                   <item.icon className="mr-3 h-5 w-5" />
@@ -110,16 +109,18 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex h-16 items-center justify-between border-b bg-white px-4 sm:px-6">
+        <header className="flex h-16 items-center justify-between border-b bg-card px-4 sm:px-6 relative z-10">
           <button
-            className="rounded-md p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
+            className="rounded-md p-2 text-muted-foreground hover:bg-accent lg:hidden"
             onClick={toggleSidebar}
           >
             <Menu size={20} />
           </button>
 
-          {/* User dropdown */}
-          <div className="ml-auto">
+          <div className="flex items-center gap-4 ml-auto">
+            <ThemeToggle />
+
+            {/* User dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2">

@@ -20,11 +20,14 @@ const registerSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    console.log("Registration request received");
     const body = await req.json();
+    console.log("Request body:", { ...body, password: "[REDACTED]" });
 
     // Validate input
     const result = registerSchema.safeParse(body);
     if (!result.success) {
+      console.log("Validation failed:", result.error.flatten());
       return NextResponse.json(
         { error: "Invalid input", details: result.error.flatten() },
         { status: 400 }
@@ -34,11 +37,15 @@ export async function POST(req: Request) {
     const { name, email, password } = result.data;
 
     // Connect to database
+    console.log("Connecting to database...");
     await dbConnect();
+    console.log("Database connected successfully");
 
     // Check if user already exists
+    console.log(`Checking if user exists with email: ${email}`);
     const existingUser = await User.findOne({ email }).exec();
     if (existingUser) {
+      console.log("User already exists");
       return NextResponse.json(
         { error: "Email already registered" },
         { status: 409 }
@@ -46,13 +53,22 @@ export async function POST(req: Request) {
     }
 
     // Hash the password
+    console.log("Hashing password...");
     const hashedPassword = await bcrypt.hash(password, 12);
+    console.log("Password hashed successfully");
 
     // Create new user
+    console.log("Creating new user...");
     const newUser = await User.create({
       name,
       email,
       password: hashedPassword,
+    });
+    console.log("User created successfully:", {
+      id: newUser._id.toString(),
+      email: newUser.email,
+      name: newUser.name,
+      role: newUser.role,
     });
 
     // Convert _id to string and remove password

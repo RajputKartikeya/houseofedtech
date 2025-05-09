@@ -42,8 +42,8 @@ export default function TasksPage() {
   );
 
   // Get filter values from URL
-  const status = searchParams.get("status") || "";
-  const priority = searchParams.get("priority") || "";
+  const status = searchParams.get("status") || "all";
+  const priority = searchParams.get("priority") || "all";
   const categoryId = searchParams.get("categoryId") || "";
 
   // Update search parameters in URL
@@ -73,11 +73,11 @@ export default function TasksPage() {
 
   // Handle filter changes
   const handleStatusChange = (value: string) => {
-    updateFilters({ status: value || null });
+    updateFilters({ status: value === "all" ? null : value });
   };
 
   const handlePriorityChange = (value: string) => {
-    updateFilters({ priority: value || null });
+    updateFilters({ priority: value === "all" ? null : value });
   };
 
   // Task form handlers
@@ -155,7 +155,7 @@ export default function TasksPage() {
                   <SelectValue placeholder="Status: All" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Statuses</SelectItem>
+                  <SelectItem value="all">All Statuses</SelectItem>
                   <SelectItem value={TaskStatus.TODO}>To Do</SelectItem>
                   <SelectItem value={TaskStatus.IN_PROGRESS}>
                     In Progress
@@ -174,7 +174,7 @@ export default function TasksPage() {
                   <SelectValue placeholder="Priority: All" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Priorities</SelectItem>
+                  <SelectItem value="all">All Priorities</SelectItem>
                   <SelectItem value={TaskPriority.LOW}>Low</SelectItem>
                   <SelectItem value={TaskPriority.MEDIUM}>Medium</SelectItem>
                   <SelectItem value={TaskPriority.HIGH}>High</SelectItem>

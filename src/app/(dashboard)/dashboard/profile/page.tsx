@@ -177,7 +177,7 @@ export default function ProfilePage() {
           </CardHeader>
           <Form {...form}>
             <form onSubmit={handleSubmit(onSubmit)}>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
                 <FormField
                   control={form.control}
                   name="name"
@@ -229,7 +229,7 @@ export default function ProfilePage() {
                   )}
                 />
               </CardContent>
-              <CardFooter>
+              <CardFooter className="pt-6">
                 <Button
                   type="submit"
                   className="ml-auto"

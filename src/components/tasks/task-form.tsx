@@ -258,8 +258,10 @@ export function TaskForm({
               <FormItem>
                 <FormLabel>Category</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value || undefined}
+                  onValueChange={(value) =>
+                    field.onChange(value === "none" ? null : value)
+                  }
+                  defaultValue={field.value || "none"}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -267,7 +269,7 @@ export function TaskForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {categories.map((category) => (
                       <SelectItem key={category.id} value={category.id}>
                         {category.name}

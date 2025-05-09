@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,11 +25,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <AuthProvider>
-          {children}
-          <Toaster position="top-right" />
-        </AuthProvider>
+      <body className={`${inter.className} transition-colors duration-300`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            {children}
+            <Toaster position="top-right" />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

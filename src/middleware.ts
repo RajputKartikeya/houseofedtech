@@ -41,6 +41,8 @@ export async function middleware(request: NextRequest) {
 // Configure which paths the middleware runs on
 export const config = {
   // Skip API routes except for those that we want to protect
-  // We exclude /api/auth because NextAuth.js handles that
-  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico).*)"],
+  // We exclude /api/auth and /api/register because they handle their own auth
+  matcher: [
+    "/((?!api/auth|api/register|_next/static|_next/image|favicon.ico).*)",
+  ],
 };
