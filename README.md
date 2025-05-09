@@ -1,6 +1,6 @@
 # Task Management System
 
-A full-stack task management application built with Next.js 14, TypeScript, MongoDB, and NextAuth.js. This application allows users to create, organize, and track their tasks with features like categories, priorities, and due dates.
+A full-stack task management application built with Next.js 15, TypeScript, MongoDB, and NextAuth.js. This application allows users to create, organize, and track their tasks with features like categories, priorities, and due dates.
 
 ## Features
 
@@ -44,7 +44,7 @@ A full-stack task management application built with Next.js 14, TypeScript, Mong
 
 - **Frontend**
 
-  - Next.js 14 (App Router)
+  - Next.js 15 (App Router)
   - React 18
   - TypeScript
   - Tailwind CSS
@@ -78,8 +78,8 @@ A full-stack task management application built with Next.js 14, TypeScript, Mong
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/task-management-system.git
-   cd task-management-system
+   git clone https://github.com/RajputKartikeya/houseofedtech.git
+   cd houseofedtech
    ```
 
 2. Install dependencies:
@@ -193,10 +193,6 @@ This application is configured for deployment on Vercel:
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Acknowledgments
 
