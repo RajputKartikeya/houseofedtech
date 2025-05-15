@@ -3,6 +3,20 @@
  */
 
 import { TaskPriority, TaskStatus } from "@/types";
+import {
+  createTask,
+  updateTask,
+  deleteTask,
+  getTasks,
+  getTaskById,
+} from "@/lib/actions/task.actions";
+import {
+  getCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+} from "@/lib/actions/category.actions";
+import { registerUser } from "@/lib/actions/auth.actions";
 
 type FetchOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
@@ -82,7 +96,7 @@ interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   dueDate?: string | Date;
-  category?: { id: string; name: string };
+  category?: { id: string; name: string } | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -129,74 +143,202 @@ interface UserRegisterData {
 export const apiClient = {
   // Tasks
   async getTasks(params?: URLSearchParams): Promise<TasksResponse> {
-    const url = params ? `/api/tasks?${params.toString()}` : "/api/tasks";
-    return fetchApi(url);
+    try {
+      // Extract parameters from URLSearchParams
+      const status = params?.get("status") || "";
+      const priority = params?.get("priority") || "";
+      const categoryId = params?.get("categoryId") || "";
+      const search = params?.get("search") || "";
+      const page = parseInt(params?.get("page") || "1", 10);
+      const limit = parseInt(params?.get("limit") || "10", 10);
+      const sortBy = params?.get("sortBy") || "createdAt";
+      const sortOrder = (params?.get("sortOrder") || "desc") as "asc" | "desc";
+
+      const result = await getTasks({
+        status,
+        priority,
+        categoryId,
+        search,
+        page,
+        limit,
+        sortBy,
+        sortOrder,
+      });
+
+      return result as TasksResponse;
+    } catch (error) {
+      console.error("Error in getTasks client:", error);
+      throw new ApiError(
+        500,
+        error instanceof Error ? error.message : "Failed to fetch tasks"
+      );
+    }
   },
 
   async getTask(id: string): Promise<Task> {
-    return fetchApi(`/api/tasks/${id}`);
+    try {
+      const task = await getTaskById(id);
+      return task as unknown as Task;
+    } catch (error) {
+      console.error("Error in getTask client:", error);
+      throw new ApiError(
+        500,
+        error instanceof Error ? error.message : "Failed to fetch task"
+      );
+    }
   },
 
   async createTask(
     data: TaskCreateData
   ): Promise<{ message: string; task: Task }> {
-    return fetchApi("/api/tasks", {
-      method: "POST",
-      body: data,
-    });
+    try {
+      const createData = {
+        title: data.title,
+        description: data.description,
+        status: data.status || TaskStatus.TODO,
+        priority: data.priority || TaskPriority.MEDIUM,
+        dueDate: data.dueDate ? data.dueDate.toISOString() : null,
+        categoryId: data.categoryId,
+      };
+
+      const task = await createTask(createData);
+
+      return {
+        message: "Task created successfully",
+        task: task as unknown as Task,
+      };
+    } catch (error) {
+      console.error("Error in createTask client:", error);
+      throw new ApiError(
+        500,
+        error instanceof Error ? error.message : "Failed to create task"
+      );
+    }
   },
 
   async updateTask(
     id: string,
     data: TaskCreateData
   ): Promise<{ message: string; task: Task }> {
-    return fetchApi(`/api/tasks/${id}`, {
-      method: "PATCH",
-      body: data,
-    });
+    try {
+      const updatedData: Record<string, unknown> = {};
+
+      if (data.title !== undefined) updatedData.title = data.title;
+      if (data.description !== undefined)
+        updatedData.description = data.description;
+      if (data.status !== undefined) updatedData.status = data.status;
+      if (data.priority !== undefined) updatedData.priority = data.priority;
+      if (data.categoryId !== undefined)
+        updatedData.categoryId = data.categoryId;
+      if (data.dueDate !== undefined) {
+        updatedData.dueDate = data.dueDate ? data.dueDate.toISOString() : null;
+      }
+
+      const task = await updateTask(id, updatedData);
+
+      return {
+        message: "Task updated successfully",
+        task: task as unknown as Task,
+      };
+    } catch (error) {
+      console.error("Error in updateTask client:", error);
+      throw new ApiError(
+        500,
+        error instanceof Error ? error.message : "Failed to update task"
+      );
+    }
   },
 
   async deleteTask(id: string): Promise<{ message: string }> {
-    return fetchApi(`/api/tasks/${id}`, {
-      method: "DELETE",
-    });
+    try {
+      await deleteTask(id);
+      return { message: "Task deleted successfully" };
+    } catch (error) {
+      console.error("Error in deleteTask client:", error);
+      throw new ApiError(
+        500,
+        error instanceof Error ? error.message : "Failed to delete task"
+      );
+    }
   },
 
   // Categories
   async getCategories(): Promise<Category[]> {
-    return fetchApi("/api/categories");
+    try {
+      const categories = await getCategories();
+      return categories as Category[];
+    } catch (error) {
+      console.error("Error in getCategories client:", error);
+      throw new ApiError(
+        500,
+        error instanceof Error ? error.message : "Failed to fetch categories"
+      );
+    }
   },
 
   async createCategory(
     data: CategoryData
   ): Promise<{ message: string; category: Category }> {
-    return fetchApi("/api/categories", {
-      method: "POST",
-      body: data,
-    });
+    try {
+      const category = await createCategory(data);
+
+      return {
+        message: "Category created successfully",
+        category: category as Category,
+      };
+    } catch (error) {
+      console.error("Error in createCategory client:", error);
+      throw new ApiError(
+        500,
+        error instanceof Error ? error.message : "Failed to create category"
+      );
+    }
   },
 
   async updateCategory(
     id: string,
     data: CategoryData
   ): Promise<{ message: string; category: Category }> {
-    return fetchApi(`/api/categories/${id}`, {
-      method: "PATCH",
-      body: data,
-    });
+    try {
+      const category = await updateCategory(id, data);
+
+      return {
+        message: "Category updated successfully",
+        category: category as Category,
+      };
+    } catch (error) {
+      console.error("Error in updateCategory client:", error);
+      throw new ApiError(
+        500,
+        error instanceof Error ? error.message : "Failed to update category"
+      );
+    }
   },
 
   async deleteCategory(id: string): Promise<{ message: string }> {
-    return fetchApi(`/api/categories/${id}`, {
-      method: "DELETE",
-    });
+    try {
+      await deleteCategory(id);
+      return { message: "Category deleted successfully" };
+    } catch (error) {
+      console.error("Error in deleteCategory client:", error);
+      throw new ApiError(
+        500,
+        error instanceof Error ? error.message : "Failed to delete category"
+      );
+    }
   },
 
   // User registration
   async register(data: UserRegisterData): Promise<{ message: string }> {
-    return fetchApi("/api/register", {
-      method: "POST",
-      body: data,
-    });
+    try {
+      const result = await registerUser(data);
+      return { message: result.message };
+    } catch (error) {
+      console.error("Error in register client:", error);
+      throw new ApiError(
+        500,
+        error instanceof Error ? error.message : "Failed to register user"
+      );
+    }
   },
 };

@@ -1,9 +1,10 @@
-import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import { z } from "zod";
+"use server";
 
+import { z } from "zod";
+import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/db/connect";
 import User from "@/models/user.model";
+import { revalidatePath } from "next/cache";
 
 // Input validation schema
 const registerSchema = z.object({
@@ -18,19 +19,20 @@ const registerSchema = z.object({
     .max(100, "Password is too long"),
 });
 
-export async function POST(req: Request) {
+export async function registerUser(data: z.infer<typeof registerSchema>) {
   try {
     console.log("Registration request received");
-    const body = await req.json();
-    console.log("Request body:", { ...body, password: "[REDACTED]" });
+    console.log("Request data:", { ...data, password: "[REDACTED]" });
 
     // Validate input
-    const result = registerSchema.safeParse(body);
+    const result = registerSchema.safeParse(data);
     if (!result.success) {
       console.log("Validation failed:", result.error.flatten());
-      return NextResponse.json(
-        { error: "Invalid input", details: result.error.flatten() },
-        { status: 400 }
+      throw new Error(
+        JSON.stringify({
+          error: "Invalid input",
+          details: result.error.flatten(),
+        })
       );
     }
 
@@ -46,10 +48,7 @@ export async function POST(req: Request) {
     const existingUser = await User.findOne({ email }).exec();
     if (existingUser) {
       console.log("User already exists");
-      return NextResponse.json(
-        { error: "Email already registered" },
-        { status: 409 }
-      );
+      throw new Error("Email already registered");
     }
 
     // Hash the password
@@ -80,12 +79,16 @@ export async function POST(req: Request) {
       createdAt: newUser.createdAt,
     };
 
-    return NextResponse.json(
-      { message: "User registered successfully", user },
-      { status: 201 }
-    );
+    revalidatePath("/login");
+
+    return {
+      message: "User registered successfully",
+      user,
+    };
   } catch (error) {
     console.error("Registration error:", error);
-    return NextResponse.json({ error: "Registration failed" }, { status: 500 });
+    throw new Error(
+      error instanceof Error ? error.message : "Registration failed"
+    );
   }
 }

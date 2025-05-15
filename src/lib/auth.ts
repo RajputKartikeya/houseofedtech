@@ -90,7 +90,7 @@ export const authOptions: NextAuthOptions = {
     error: "/login",
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: true, // Enable debug mode
+  debug: process.env.NODE_ENV === "development",
 };
 
 // Extend the next-auth session types

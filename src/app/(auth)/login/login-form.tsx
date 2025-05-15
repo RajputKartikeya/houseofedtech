@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { z } from "zod";
 import { useState } from "react";
 
@@ -26,6 +25,7 @@ import {
 } from "@/components/ui/form";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { toast } from "sonner";
+import { signIn } from "@/utils/auth-utils";
 
 // Form validation schema
 const loginSchema = z.object({
@@ -36,7 +36,6 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const [authError, setAuthError] = useState<string | null>(null);
@@ -56,22 +55,21 @@ export default function LoginForm() {
     try {
       setAuthError(null);
 
-      const result = await signIn("credentials", {
-        redirect: false,
-        email: data.email,
-        password: data.password,
-      });
+      const result = await signIn(
+        {
+          email: data.email,
+          password: data.password,
+        },
+        callbackUrl
+      );
 
-      if (result?.error) {
-        setAuthError("Invalid email or password");
+      if (!result.success) {
+        setAuthError(result.error || "Invalid email or password");
         return;
       }
 
-      if (result?.ok) {
-        toast.success("Logged in successfully");
-        router.push(callbackUrl);
-        router.refresh();
-      }
+      toast.success("Logged in successfully");
+      // No need to manually redirect as signIn handles it
     } catch (error) {
       console.error("Login error:", error);
       setAuthError("Something went wrong. Please try again.");
