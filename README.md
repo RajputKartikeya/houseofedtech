@@ -110,34 +110,62 @@ A full-stack task management application built with Next.js 15, TypeScript, Mong
 ## Project Structure
 
 ```
-src/
-├── app/                    # Next.js App Router
-│   ├── (auth)/            # Authentication pages
-│   │   ├── login/         # Login page and form
-│   │   └── register/      # Registration page
-│   ├── (dashboard)/       # Protected dashboard pages
-│   │   ├── dashboard/     # Main dashboard
-│   │   ├── tasks/         # Task management
-│   │   ├── categories/    # Category management
-│   │   └── profile/       # User profile
-│   ├── api/               # API routes
-│   │   ├── auth/          # Authentication endpoints
-│   │   ├── tasks/         # Task endpoints
-│   │   └── categories/    # Category endpoints
-│   └── layout.tsx         # Root layout
-├── components/            # React components
-│   ├── auth/             # Authentication components
-│   ├── dashboard/        # Dashboard components
-│   ├── tasks/            # Task-related components
-│   └── ui/               # UI components (shadcn/ui)
-├── hooks/                # Custom React hooks
-├── lib/                  # Utility library code
-│   └── db/              # Database utilities
-├── middleware.ts         # Next.js middleware for auth
-├── models/              # Mongoose models
-├── types/               # TypeScript types
-└── utils/               # Helper utilities
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── (auth)/            # Authentication pages
+│   │   │   ├── login/         # Login page and form
+│   │   │   └── register/      # Registration page
+│   │   ├── (dashboard)/       # Protected dashboard pages
+│   │   │   ├── dashboard/     # Main dashboard
+│   │   │   ├── tasks/         # Task management
+│   │   │   ├── categories/    # Category management
+│   │   │   └── profile/       # User profile
+│   │   ├── api/               # API routes
+│   │   │   └── auth/          # Authentication endpoints
+│   │   ├── layout.tsx         # Root layout
+│   │   ├── page.tsx           # Home page
+│   │   └── globals.css        # Global styles
+│   ├── components/            # React components
+│   │   ├── auth/             # Authentication components
+│   │   ├── dashboard/        # Dashboard components
+│   │   ├── tasks/            # Task-related components
+│   │   └── ui/               # UI components (shadcn/ui)
+│   ├── hooks/                # Custom React hooks
+│   ├── lib/                  # Utility library code
+│   │   ├── actions/          # Server actions
+│   │   ├── db/              # Database utilities
+│   │   ├── utils/           # Utility functions
+│   │   ├── auth.ts          # Authentication utilities
+│   │   ├── check-auth.ts    # Auth check utilities
+│   │   ├── get-session.ts   # Session management
+│   │   └── utils.ts         # General utilities
+│   ├── middleware.ts         # Next.js middleware for auth
+│   ├── models/              # Mongoose models
+│   ├── types/               # TypeScript types
+│   └── utils/               # Helper utilities
+├── public/                  # Static assets
+├── .next/                   # Next.js build output
+├── node_modules/           # Dependencies
+├── components.json         # shadcn/ui configuration
+├── next.config.ts         # Next.js configuration
+├── package.json           # Project dependencies and scripts
+├── postcss.config.mjs     # PostCSS configuration
+├── tailwind.config.js     # Tailwind CSS configuration
+└── tsconfig.json          # TypeScript configuration
 ```
+
+## Version Updates
+
+### v1.1 (Latest)
+
+- Migrated Task CRUD operations to Next.js Server Actions for improved performance
+- Updated NextAuth.js to the latest version with enhanced security
+- Improved authentication flow and session management
+- Added client-side filtering capabilities for tasks
+- Enhanced error handling and loading states
+- Optimized database queries and API responses
+- Added real-time task refresh functionality
+- Improved TypeScript type safety across the application
 
 ## API Routes
 
