@@ -42,11 +42,11 @@ interface Task {
   description?: string;
   status: TaskStatus;
   priority: TaskPriority;
-  dueDate?: string;
+  dueDate?: string | Date;
   category?: {
     id: string;
     name: string;
-  };
+  } | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -57,6 +57,14 @@ interface TaskListProps {
   onEditTask?: (task: Task) => void;
   onTasksUpdated?: () => void;
   refetchTrigger?: number;
+  tasks?: Task[];
+  isLoading?: boolean;
+  pagination?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 export function TaskList({
@@ -65,22 +73,48 @@ export function TaskList({
   onEditTask,
   onTasksUpdated,
   refetchTrigger = 0,
+  tasks: propTasks,
+  isLoading: propIsLoading,
+  pagination: propPagination,
 }: TaskListProps) {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [tasks, setTasks] = useState<Task[]>(propTasks || []);
+  const [isLoading, setIsLoading] = useState(
+    propIsLoading !== undefined ? propIsLoading : true
+  );
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
   const [selectedTasks, setSelectedTasks] = useState<Record<string, boolean>>(
     {}
   );
-  const [pagination, setPagination] = useState({
-    total: 0,
-    page: 1,
-    limit: 10,
-    totalPages: 1,
-  });
+  const [pagination, setPagination] = useState(
+    propPagination || {
+      total: 0,
+      page: 1,
+      limit: 10,
+      totalPages: 1,
+    }
+  );
 
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  // Update local state when props change
+  useEffect(() => {
+    if (propTasks) {
+      setTasks(propTasks);
+    }
+  }, [propTasks]);
+
+  useEffect(() => {
+    if (propIsLoading !== undefined) {
+      setIsLoading(propIsLoading);
+    }
+  }, [propIsLoading]);
+
+  useEffect(() => {
+    if (propPagination) {
+      setPagination(propPagination);
+    }
+  }, [propPagination]);
 
   // Build query parameters for API requests
   const buildQueryParams = useCallback(
@@ -105,8 +139,11 @@ export function TaskList({
     [searchParams, status, category]
   );
 
-  // Fetch tasks based on filters
+  // Fetch tasks based on filters - only used if tasks are not provided via props
   const fetchTasks = useCallback(async () => {
+    // Skip fetching if tasks are provided via props
+    if (propTasks) return;
+
     try {
       setIsLoading(true);
 
@@ -133,12 +170,15 @@ export function TaskList({
     } finally {
       setIsLoading(false);
     }
-  }, [buildQueryParams]);
+  }, [buildQueryParams, propTasks]);
 
   // Watch for search param changes and re-fetch tasks
   useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks, refetchTrigger]);
+    // Only fetch tasks if they're not provided via props
+    if (!propTasks) {
+      fetchTasks();
+    }
+  }, [fetchTasks, refetchTrigger, propTasks]);
 
   // Delete task handler
   const deleteTask = async () => {
@@ -294,10 +334,10 @@ export function TaskList({
   };
 
   // Due date renderer
-  const renderDueDate = (dueDate?: string) => {
+  const renderDueDate = (dueDate?: string | Date) => {
     if (!dueDate) return "No due date";
 
-    const date = new Date(dueDate);
+    const date = dueDate instanceof Date ? dueDate : new Date(dueDate);
     const now = new Date();
     const isPast = date < now;
 

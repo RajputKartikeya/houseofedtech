@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Filter } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Plus, Filter, RotateCcw } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,15 +26,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { TaskList } from "@/components/tasks/task-list";
 import { TaskForm } from "@/components/tasks/task-form";
 import { TaskPriority, TaskStatus } from "@/types";
+import { useTasks } from "@/hooks/use-tasks";
+import { Badge } from "@/components/ui/badge";
+import { formatDistanceToNow } from "date-fns";
 
 export default function TasksContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const [isCreateDialogOpen, setCreateDialogOpen] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState<{
@@ -44,7 +51,7 @@ export default function TasksContent() {
     status: TaskStatus;
     priority: TaskPriority;
     dueDate?: string | Date;
-    category?: { id: string; name: string };
+    category?: { id: string; name: string } | null;
   } | null>(null);
   const [searchTerm, setSearchTerm] = useState(
     searchParams.get("search") || ""
@@ -54,24 +61,16 @@ export default function TasksContent() {
   const status = searchParams.get("status") || "all";
   const priority = searchParams.get("priority") || "all";
 
-  // Update search parameters in URL
-  const updateFilters = (params: Record<string, string | null>) => {
-    const urlParams = new URLSearchParams(searchParams.toString());
-
-    // Set or remove each parameter
-    Object.entries(params).forEach(([key, value]) => {
-      if (value === null) {
-        urlParams.delete(key);
-      } else {
-        urlParams.set(key, value);
-      }
-    });
-
-    // Reset to page 1 when filters change
-    urlParams.set("page", "1");
-
-    router.push(`?${urlParams.toString()}`);
-  };
+  // Use our new hook for tasks
+  const {
+    tasks,
+    isLoading,
+    pagination,
+    updateFilters,
+    refreshTasks,
+    isClientSideFiltering,
+    lastRefreshTimestamp,
+  } = useTasks();
 
   // Handle search submission
   const handleSearch = (e: React.FormEvent) => {
@@ -100,7 +99,7 @@ export default function TasksContent() {
     status: TaskStatus;
     priority: TaskPriority;
     dueDate?: string | Date;
-    category?: { id: string; name: string };
+    category?: { id: string; name: string } | null;
   }) => {
     setTaskToEdit(task);
   };
@@ -108,7 +107,7 @@ export default function TasksContent() {
   const handleTaskFormSuccess = () => {
     setCreateDialogOpen(false);
     setTaskToEdit(null);
-    setRefreshTrigger((prev) => prev + 1);
+    refreshTasks();
   };
 
   const handleCloseTaskForm = () => {
@@ -142,10 +141,49 @@ export default function TasksContent() {
       {/* Filters */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Filters</CardTitle>
-          <CardDescription>
-            Filter tasks to find what you&apos;re looking for
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-base">Filters</CardTitle>
+              <CardDescription>
+                Filter tasks to find what you&apos;re looking for
+              </CardDescription>
+            </div>
+            <div className="flex items-center space-x-2">
+              {isClientSideFiltering && (
+                <Badge variant="outline" className="bg-yellow-50">
+                  Client filtering active
+                </Badge>
+              )}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={refreshTasks}
+                      className="h-8 w-8"
+                    >
+                      <RotateCcw className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>
+                      Refresh from server
+                      {lastRefreshTimestamp > 0 && (
+                        <span className="ml-1 text-xs text-gray-500">
+                          (last:{" "}
+                          {formatDistanceToNow(lastRefreshTimestamp, {
+                            addSuffix: true,
+                          })}
+                          )
+                        </span>
+                      )}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col space-y-4 md:flex-row md:items-end md:space-x-4 md:space-y-0">
@@ -204,9 +242,11 @@ export default function TasksContent() {
 
       {/* Task list */}
       <TaskList
+        tasks={tasks}
+        isLoading={isLoading}
+        pagination={pagination}
         onEditTask={handleEditTask}
-        onTasksUpdated={() => setRefreshTrigger((prev) => prev + 1)}
-        refetchTrigger={refreshTrigger}
+        onTasksUpdated={refreshTasks}
       />
 
       {/* Create task dialog */}
